@@ -12,6 +12,9 @@ const Sidebar = () => {
         <NavLink to="/clients" className="flex items-center gap-2 hover:text-blue-600">
           <Users size={20} /> Clients
         </NavLink>
+        <NavLink to="/projects" className="flex items-center gap-2 hover:text-blue-600">
+          <Users size={20} /> Projects
+        </NavLink>
         <NavLink to="/settings" className="flex items-center gap-2 hover:text-blue-600">
           <Settings size={20} /> Settings
         </NavLink>

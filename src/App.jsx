@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Client from "./pages/Client"
-import DashBoardLayout from "./components/DashBoardLayout"
+import Client from "./pages/Client";
+import Projects from "./pages/Project.jsx";
+import DashBoardLayout from "./components/DashBoardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
@@ -26,6 +27,17 @@ const App = () => {
               <ProtectedRoute>
               <DashBoardLayout>
               <Client />
+              </DashBoardLayout>
+              </ProtectedRoute>
+            }
+        />
+
+        <Route
+          path="/projects"
+         element={
+              <ProtectedRoute>
+              <DashBoardLayout>
+              <Projects />
               </DashBoardLayout>
               </ProtectedRoute>
             }
