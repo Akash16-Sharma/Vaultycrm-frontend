@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Client from "./pages/Client";
 import Projects from "./pages/Project.jsx";
+import Task from "./pages/Task.jsx"
 import DashBoardLayout from "./components/DashBoardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -38,6 +39,16 @@ const App = () => {
               <ProtectedRoute>
               <DashBoardLayout>
               <Projects />
+              </DashBoardLayout>
+              </ProtectedRoute>
+            }
+        />
+        <Route
+          path="/task"
+         element={
+              <ProtectedRoute>
+              <DashBoardLayout>
+              <Task />
               </DashBoardLayout>
               </ProtectedRoute>
             }
