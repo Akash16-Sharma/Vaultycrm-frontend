@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AddTaskModal from "../components/AddTaskModal";
 import EditTaskModal from "../components/EditTaskModal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Task = () => {
   const [tasks, setTasks] = useState([]);
@@ -9,8 +11,8 @@ const Task = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [filterStatus, setFilterStatus] = useState("All");
 
-  // Fetch projects
   const fetchProjects = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/projects", {
@@ -20,17 +22,15 @@ const Task = () => {
       });
 
       setProjects(res.data);
-
-      // Set the first project as selected if not already set
       if (res.data.length > 0 && !selectedProjectId) {
         setSelectedProjectId(res.data[0]._id);
       }
     } catch (err) {
       console.error("Failed to fetch projects", err);
+      toast.error("Failed to load projects");
     }
   };
 
-  // Fetch tasks for the selected project
   const fetchTasks = async () => {
     if (!selectedProjectId) return;
 
@@ -43,13 +43,19 @@ const Task = () => {
           },
         }
       );
-      setTasks(res.data);
+
+      let filtered = res.data;
+      if (filterStatus !== "All") {
+        filtered = filtered.filter((t) => t.status === filterStatus);
+      }
+
+      setTasks(filtered);
     } catch (err) {
       console.error("Failed to fetch tasks", err);
+      toast.error("Failed to load tasks");
     }
   };
 
-  // Delete task
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
 
@@ -59,9 +65,30 @@ const Task = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      toast.success("Task deleted");
       fetchTasks();
     } catch (err) {
       console.error("Delete failed", err);
+      toast.error("Delete failed");
+    }
+  };
+
+  const handleStatusChange = async (id, status) => {
+    try {
+      await axios.patch(
+        `http://localhost:5000/api/tasks/${id}/status`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success("Status updated");
+      fetchTasks();
+    } catch (err) {
+      console.error("Status update failed", err);
+      toast.error("Failed to update status");
     }
   };
 
@@ -71,11 +98,11 @@ const Task = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [selectedProjectId]);
+  }, [selectedProjectId, filterStatus]);
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div>
           <h2 className="text-2xl font-semibold">Tasks</h2>
           <select
@@ -91,12 +118,25 @@ const Task = () => {
           </select>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          + Add Task
-        </button>
+        <div className="flex items-center gap-4">
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option value="All">All</option>
+            <option value="Todo">Todo</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Done">Done</option>
+          </select>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            + Add Task
+          </button>
+        </div>
       </div>
 
       <table className="w-full text-left border">
@@ -112,7 +152,17 @@ const Task = () => {
           {tasks.map((task) => (
             <tr key={task._id} className="border-t">
               <td className="p-2">{task.title}</td>
-              <td className="p-2">{task.status}</td>
+              <td className="p-2">
+                <select
+                  value={task.status}
+                  onChange={(e) => handleStatusChange(task._id, e.target.value)}
+                  className="p-1 border rounded"
+                >
+                  <option value="Todo">Todo</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Done">Done</option>
+                </select>
+              </td>
               <td className="p-2">{task.description}</td>
               <td className="p-2 space-x-2">
                 <button
